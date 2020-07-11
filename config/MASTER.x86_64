@@ -24,7 +24,7 @@
 #  BSD_RELEASE =    [ BSD_BASE ]
 #  BSD_DEV =        [ BSD_BASE config_vnguard ]
 #  BSD_DEBUG =      [ BSD_BASE config_vnguard ]
-#  FILESYS_BASE =   [ devfs fdesc config_dev_kmem config_fse quota namedstreams config_mnt_rootsnap config_mount_vm config_keypage_wp config_protect fifo config_volfs fs_compression config_imgsrc_access config_triggers config_ext_resolver config_searchfs config_appledouble nullfs config_mnt_suid config_firmlinks config_dataless_files ]
+#  FILESYS_BASE =   [ devfs fdesc config_dev_kmem config_fse quota namedstreams config_mnt_rootsnap config_rosv_startup config_mount_vm config_keypage_wp config_protect fifo config_volfs fs_compression config_imgsrc_access config_triggers config_ext_resolver config_searchfs config_appledouble nullfs config_mnt_suid config_firmlinks config_dataless_files ]
 #  FILESYS_RELEASE= [ FILESYS_BASE ]
 #  FILESYS_DEV =    [ FILESYS_BASE ]
 #  FILESYS_DEBUG =  [ FILESYS_BASE ]

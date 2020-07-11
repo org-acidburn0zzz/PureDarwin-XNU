@@ -1349,7 +1349,8 @@ static const OSSymbol * gIOPMUserIsActiveKey;
 //
 //******************************************************************************
 
-#define kRootDomainSettingsCount        17
+#define kRootDomainSettingsCount           19
+#define kRootDomainNoPublishSettingsCount  3
 
 bool
 IOPMrootDomain::start( IOService * nub )
@@ -1400,7 +1401,16 @@ IOPMrootDomain::start( IOService * nub )
 		OSSymbol::withCString(kIOPMSettingMobileMotionModuleKey),
 		OSSymbol::withCString(kIOPMSettingGraphicsSwitchKey),
 		OSSymbol::withCString(kIOPMStateConsoleShutdown),
-		gIOPMSettingSilentRunningKey
+		OSSymbol::withCString(kIOPMSettingProModeControl),
+		OSSymbol::withCString(kIOPMSettingProModeDefer),
+		gIOPMSettingSilentRunningKey,
+	};
+
+	const OSSymbol  *noPublishSettingsArr[kRootDomainNoPublishSettingsCount] =
+	{
+		OSSymbol::withCString(kIOPMSettingProModeControl),
+		OSSymbol::withCString(kIOPMSettingProModeDefer),
+		gIOPMSettingSilentRunningKey,
 	};
 
 	PE_parse_boot_argn("darkwake", &gDarkWakeFlags, sizeof(gDarkWakeFlags));
@@ -1518,7 +1528,9 @@ IOPMrootDomain::start( IOService * nub )
 	// List of PM settings that should not automatically publish itself
 	// as a feature when registered by a listener.
 	noPublishPMSettings = OSArray::withObjects(
-		(const OSObject **) &gIOPMSettingSilentRunningKey, 1, 0);
+		(const OSObject **)noPublishSettingsArr,
+		kRootDomainNoPublishSettingsCount,
+		0);
 
 	fPMSettingsDict = OSDictionary::withCapacity(5);
 	preventIdleSleepList = OSSet::withCapacity(8);
@@ -7883,6 +7895,18 @@ IOPMrootDomain::handlePowerNotification( UInt32 msg )
 			evaluatePolicy( kStimulusDarkWakeEvaluate );
 		}
 	}
+
+	if (msg & kIOPMProModeEngaged) {
+		int newState = 1;
+		DLOG("ProModeEngaged\n");
+		messageClient(kIOPMMessageProModeStateChange, systemCapabilityNotifier, &newState, sizeof(newState));
+	}
+
+	if (msg & kIOPMProModeDisengaged) {
+		int newState = 0;
+		DLOG("ProModeDisengaged\n");
+		messageClient(kIOPMMessageProModeStateChange, systemCapabilityNotifier, &newState, sizeof(newState));
+	}
 }
 
 //******************************************************************************
@@ -9859,7 +9883,7 @@ IOPMrootDomain::acceptSystemWakeEvents( bool accept )
 		}
 		_acceptSystemWakeEvents = (_systemWakeEventsArray != NULL);
 #if !(defined(RC_HIDE_N144) || defined(RC_HIDE_N146))
-		if (!(kIOPMWakeEventAOTExitFlags & _aotPendingFlags))
+		if (!(_aotNow && (kIOPMWakeEventAOTExitFlags & _aotPendingFlags)))
 #endif /* !(defined(RC_HIDE_N144) || defined(RC_HIDE_N146)) */
 		{
 			gWakeReasonString[0] = '\0';

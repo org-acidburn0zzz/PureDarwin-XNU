@@ -38,6 +38,9 @@ CODESIGN_ALLOCATE:=$(shell xcrun -sdk "$(TARGETSDK)" -find codesign_allocate)
 
 atm_diagnostic_flag: OTHER_CFLAGS += drop_priv.c
 
+atm_diagnostic_flag_entitled: CODE_SIGN_ENTITLEMENTS = atm_diagnostic_flag.entitlements
+atm_diagnostic_flag_entitled: OTHER_CFLAGS += drop_priv.c
+
 testposixshm: INVALID_ARCHS = i386
 
 avx: INVALID_ARCHS = i386
@@ -96,6 +99,10 @@ shared_cache_tests: OTHER_LDFLAGS += -ldarwintest_utils
 stackshot_tests: OTHER_CFLAGS += -Wno-objc-messaging-id
 stackshot_tests: OTHER_LDFLAGS += -lkdd -ldarwintest_utils -framework Foundation
 stackshot_tests: INVALID_ARCHS = i386
+
+stackshot_accuracy: OTHER_CFLAGS += -ldarwintest_utils -Wno-objc-messaging-id
+stackshot_accuracy: OTHER_LDFLAGS += -lkdd -ldarwintest_utils -framework Foundation
+stackshot_accuracy: INVALID_ARCHS = i386
 
 telemetry: OTHER_LDFLAGS = -framework ktrace -framework CoreFoundation
 telemetry: INVALID_ARCHS = i386
@@ -273,16 +280,31 @@ net_tuntests: CODE_SIGN_ENTITLEMENTS = network_entitlements.plist
 
 ifneq (osx,$(TARGET_NAME))
 EXCLUDED_SOURCES += no32exec_35914211.c no32exec_35914211_helper.c
-endif
+else  # target = osx
+CUSTOM_TARGETS += no32exec_35914211_helper no32exec_35914211_helper_binprefs
 
-no32exec_35914211_helper: INVALID_ARCHS = x86_64
+no32exec_35914211_helper: INVALID_ARCHS = x86_64 i386
+no32exec_35914211_helper:
+	$(CC) $(LDFLAGS) $(CFLAGS) -arch i386  no32exec_35914211_helper.c -o $(SYMROOT)/$@;
+	env CODESIGN_ALLOCATE=$(CODESIGN_ALLOCATE) $(CODESIGN) --force --sign - --timestamp=none $(SYMROOT)/$@;
+
+install-no32exec_35914211_helper:
+	mkdir -p $(INSTALLDIR)
+	cp $(SYMROOT)/no32exec_35914211_helper $(INSTALLDIR)/
+
+no32exec_35914211_helper_binprefs: INVALID_ARCHS = x86_64 i386
 no32exec_35914211_helper_binprefs:
-	$(CC) $(OTHER_CFLAGS) $(CFLAGS) $(OTHER_LDFLAGS) $(LDFLAGS) -ldarwintest -arch i386 -arch x86_64 \
-		no32exec_35914211_helper_binprefs.c -o $(SYMROOT)/no32exec_35914211_helper_binprefs
+	$(CC) $(OTHER_CFLAGS) $(CFLAGS) $(OTHER_LDFLAGS) $(LDFLAGS) -arch i386 -arch x86_64  no32exec_35914211_helper.c -o $(SYMROOT)/$@;
+	env CODESIGN_ALLOCATE=$(CODESIGN_ALLOCATE) $(CODESIGN) --force --sign - --timestamp=none $(SYMROOT)/$@;
+
+install-no32exec_35914211_helper_binprefs:
+	mkdir -p $(INSTALLDIR)
+	cp $(SYMROOT)/no32exec_35914211_helper_binprefs $(INSTALLDIR)/
 
 no32exec_35914211: INVALID_ARCHS = i386
 no32exec_35914211: no32exec_35914211_helper
 no32exec_35914211: no32exec_35914211_helper_binprefs
+endif  # (osx,$(TARGET_NAME)))
 
 MIG:=SDKROOT=$(SDKROOT) $(shell xcrun -sdk "$(TARGETSDK)" -find mig)
 
