@@ -5,7 +5,9 @@ XNU kernel is part of the Darwin operating system for use in macOS and iOS opera
 XNU is a hybrid kernel combining the Mach kernel developed at Carnegie Mellon University with components from FreeBSD and a C++ API for writing drivers called IOKit.
 XNU runs on x86_64 for both single processor and multi-processor configurations.
 
-What is PureDarwin-XNU? ## Note::This Kernel is consider Experimental and should be used with caution! 
+What is PureDarwin-XNU?
+===========
+Note::This Kernel is considered Experimental and should be used with Caution!  
 ===========
 
 PureDarwin-XNU is modifided darwin xnu kernel that supports X86_64 with net80211 modifcations for wireless network stack. 
