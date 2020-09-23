@@ -7,7 +7,7 @@ XNU runs on x86_64 for both single processor and multi-processor configurations.
 
 What is PureDarwin-XNU?
 ===========
-Note::This Kernel is considered Experimental and should be used with Caution!  
+#### Note::This Kernel is considered Experimental and should be used with Caution!  
 ===========
 
 PureDarwin-XNU is modifided darwin xnu kernel that supports X86_64 with net80211 modifcations for wireless network stack. 
